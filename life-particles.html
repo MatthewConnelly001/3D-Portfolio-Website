@@ -1,0 +1,140 @@
+
+
+<canvas id="life" class="container" width="1000" height="800" style="width: 100%; height: 100%;"></canvas>
+<button id="btn" style="position: absolute; top: 10px; left: 10px; z-index: 1;">Reset</button>
+
+
+<script>
+btn = document.getElementById("btn");
+m = document.getElementById("life").getContext("2d");
+WIDTH = 1000;
+HEIGHT = 800;
+
+// Drawing a square
+draw_rect = (c, x, y, w, h) => {
+	m.fillStyle = c;
+	m.fillRect(x, y, w, h);
+};
+
+atoms = [];
+
+// Generating an atom with specifications
+atom = (x, y, c) => {
+	return { x: x, y: y, vx: 0, vy: 0, color: c };
+};
+
+// random number between n1 & n2
+rand_range = (n1, n2) => {
+	return Math.random() * (n2-n1) + n1;
+};
+
+// Generate a number of a specific atom at random locations
+create = (number, color) => {
+	group = [];
+	for (let i = 0; i < number; i++) {
+		group.push(atom(rand_range(100, WIDTH-100), rand_range(100, HEIGHT-100), color));
+		atoms.push(group[i]);
+	}
+	return group;
+};
+
+// Applying attraction/repulsion between two different types of atoms
+interact = (atoms1, atoms2, g) => {
+	for (let i = 0; i < atoms1.length; i++) {
+		fx = 0;
+		fy = 0;
+		for (let j = 0; j < atoms2.length; j++) {
+			a = atoms1[i];
+			b = atoms2[j];
+			dx = a.x - b.x;
+			dy = a.y - b.y;
+			d = Math.sqrt(dx * dx + dy * dy);
+			if (d > 0 && d < 80) {
+				F = (g * 1) / d;
+				fx += F * dx;
+				fy += F * dy;
+			}
+		}
+		a.vx = (a.vx + fx) * 0.5;
+		a.vy = (a.vy + fy) * 0.5;
+		a.x += a.vx;
+		a.y += a.vy;
+		if (a.x <= 20) { a.vx = Math.abs(a.vx); }
+		else if (a.x >= WIDTH-20) { a.vx = -Math.abs(a.vx); }
+
+		if (a.y <= 20) { a.vy = Math.abs(a.vy); }
+		else if (a.y >= HEIGHT-20) { a.vy = -Math.abs(a.vy); }
+
+	}
+};
+
+atom_types = {}
+rules = {}
+
+update = () => {
+	// Applying rules
+	for (var c1 in rules){
+		for (var c2 in rules[c1]){
+			interact(atom_types[c1], atom_types[c2], rules[c1][c2]);
+		}
+	}
+
+	// Clearing canvas
+	draw_rect("black", 0, 0, WIDTH, HEIGHT);
+
+	// Drawing new atom positions
+	for (i = 0; i < atoms.length; i++) {
+		draw_rect(atoms[i].color, atoms[i].x, atoms[i].y, 5, 5);
+	}
+	requestAnimationFrame(update);
+};
+update();
+
+
+document.getElementById("btn").addEventListener("click", function() {
+	setup();
+});
+
+function setup() {
+	atoms = [];
+	atom_types = {
+		"yellow": create(150, "yellow"),
+		"red": create(150, "red"),
+		"green": create(150, "green"),
+		"blue": create(150, "blue"),
+	}
+
+	rules = {
+		"yellow": {
+			"yellow": rand_range(	-0.5, 0.5),
+			"red": rand_range(		-0.5, 0.5),
+			"green": rand_range(	-0.5, 0.5),
+			"blue": rand_range(		-0.5, 0.5),
+		},
+		"red": {
+			"yellow": rand_range(	-0.5, 0.3),
+			"red": rand_range(		-0.5, 0.3),
+			"green": rand_range(	-0.5, 0.3),
+			"blue": rand_range(		-0.5, 0.3),
+		},
+		"green": {
+			"yellow": rand_range(	-0.3, 0.5),
+			"red": rand_range(		-0.3, 0.5),
+			"green": rand_range(	-0.3, 0.5),
+			"blue": rand_range(		-0.3, 0.5),
+		},
+		"blue": {
+			"yellow": rand_range(	-0.3, 0.3),
+			"red": rand_range(		-0.3, 0.3),
+			"green": rand_range(	-0.3, 0.3),
+			"blue": rand_range(		-0.3, 0.3),
+		}
+	}
+
+	update();
+}
+
+setup();
+
+</script>
+
