@@ -7,10 +7,12 @@
     "serve": "vite preview"
   },
   "devDependencies": {
-    "vite": "^2.9.16"
+    "gh-pages": "^6.1.1",
+    "vite": "^2.9.17"
   },
   "dependencies": {
     "node": "^21.2.0",
     "three": "^0.128.0"
-  }
+  },
+  "deploy": "gh-pages -d ./dist/client"
 }
